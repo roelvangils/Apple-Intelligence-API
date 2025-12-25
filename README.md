@@ -9,6 +9,7 @@ A Swift-based web API that exposes Apple's on-device Foundation Models through a
 - [X] **Chat completions:** Multi-turn conversations with context
 - [X] **Streaming responses:** Real-time token streaming via Server-Sent Events
 - [X] **Multiple models:** Base and permissive content guardrails
+- [X] **Vision/OCR:** Image text extraction + LLM analysis via Vision framework
 - [ ] **Authentication**
 - [ ] **Structured outputs**
 - [ ] **Tool/function calling**
@@ -115,12 +116,46 @@ for await (const chunk of response) {
 }
 ```
 
+### Vision API (OCR + LLM)
+
+The Vision API combines Apple's Vision framework for OCR with the language model for intelligent image analysis.
+
+**OCR only** (extract text from image):
+```bash
+curl http://localhost:8080/api/v1/vision/ocr \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "<base64-encoded-image>"
+  }'
+```
+
+**OCR + Analysis** (extract text and analyze with LLM):
+```bash
+curl http://localhost:8080/api/v1/vision/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "<base64-encoded-image>",
+    "prompt": "Summarize this receipt. What was the total?"
+  }'
+```
+
+You can also use `image_url` instead of `image` to fetch from a URL:
+```bash
+curl http://localhost:8080/api/v1/vision/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image_url": "https://example.com/receipt.png",
+    "prompt": "What items are on this receipt?"
+  }'
+```
+
 ### API reference
 
 For a complete breakdown of how to use the API, I suggest looking at the [OpenAI](https://platform.openai.com/docs/api-reference/chat) or [OpenRouter](https://openrouter.ai/docs/api/reference/overview) documentation.
 
 Our API differs in a few key places:
 - Available models: `base` (default guardrails) and `permissive` (relaxed filtering)
+- Vision models: `vision-base` and `vision-permissive` for image analysis
 - Runs server on-device (so no API key needed)
 - Not all features are available!
 
@@ -136,11 +171,13 @@ swift test
 
 ### Project structure
 
-- `./Sources/routes.swift`: API route definition
+- `./Sources/routes.swift`: API route definitions (chat + vision endpoints)
 - `./Sources/Utils/AbortErrors.swift`: Error type definitions
 - `./Sources/Utils/RequestContent.swift`: Parsing incoming requests
 - `./Sources/Utils/ResponseSession.swift`: Foundation models interface
 - `./Sources/Utils/ResponseGenerator.swift`: Generates responses
+- `./Sources/Utils/VisionProcessor.swift`: Vision framework OCR integration
+- `./Sources/Utils/VisionModels.swift`: Vision API request/response models
 
 ### Contributing
 
