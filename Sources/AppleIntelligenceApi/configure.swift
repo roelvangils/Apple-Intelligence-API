@@ -27,7 +27,10 @@ public func configure(_ app: Application) async throws {
         )
     let cors = CORSMiddleware(configuration: corsConfiguration)
     app.middleware.use(cors, at: .beginning)
-    
+
+    // Increase max body size for image uploads (50MB)
+    app.routes.defaultMaxBodySize = "50mb"
+
     // register routes
     try routes(app)
 }
